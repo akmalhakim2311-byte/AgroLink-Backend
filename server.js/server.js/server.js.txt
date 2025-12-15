@@ -1,0 +1,58 @@
+import express from "express";
+import cors from "cors";
+import nodemailer from "nodemailer";
+import PDFDocument from "pdfkit";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// EMAIL TRANSPORT
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+// SEND INVOICE
+app.post("/send-invoice", async (req, res) => {
+  const { email, totalCost } = req.body;
+
+  const doc = new PDFDocument();
+  let buffers = [];
+
+  doc.on("data", buffers.push.bind(buffers));
+  doc.on("end", async () => {
+    const pdfData = Buffer.concat(buffers);
+
+    await transporter.sendMail({
+      from: `"AgroLinkX" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "AgroLinkX Invoice",
+      text: "Invoice attached",
+      attachments: [{
+        filename: "AgroLinkX_Invoice.pdf",
+        content: pdfData
+      }]
+    });
+
+    res.json({ success: true });
+  });
+
+  doc.fontSize(20).text("AgroLinkX Invoice", { align: "center" });
+  doc.moveDown();
+  doc.fontSize(14).text(`Total Cost: RM ${totalCost}`);
+  doc.text("Status: Successful");
+  doc.text("Thank you for using AgroLinkX");
+
+  doc.end();
+});
+
+app.listen(3000, () =>
+  console.log("Backend running on port 3000")
+);
