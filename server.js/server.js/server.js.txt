@@ -31,12 +31,12 @@ app.post("/send-invoice", async (req, res) => {
     const pdfData = Buffer.concat(buffers);
 
     await transporter.sendMail({
-      from: `"AgroLinkX" <${process.env.EMAIL_USER}>`,
+      from: `"AgroLink" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "AgroLinkX Invoice",
+      subject: "AgroLink Invoice",
       text: "Invoice attached",
       attachments: [{
-        filename: "AgroLinkX_Invoice.pdf",
+        filename: "AgroLink_Invoice.pdf",
         content: pdfData
       }]
     });
@@ -44,11 +44,11 @@ app.post("/send-invoice", async (req, res) => {
     res.json({ success: true });
   });
 
-  doc.fontSize(20).text("AgroLinkX Invoice", { align: "center" });
+  doc.fontSize(20).text("AgroLink Invoice", { align: "center" });
   doc.moveDown();
   doc.fontSize(14).text(`Total Cost: RM ${totalCost}`);
   doc.text("Status: Successful");
-  doc.text("Thank you for using AgroLinkX");
+  doc.text("Thank you for using AgroLink");
 
   doc.end();
 });
@@ -56,3 +56,4 @@ app.post("/send-invoice", async (req, res) => {
 app.listen(3000, () =>
   console.log("Backend running on port 3000")
 );
+
